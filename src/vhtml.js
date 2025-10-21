@@ -1,5 +1,4 @@
 import emptyTags from './empty-tags.js';
-import { LRUCache } from 'lru-cache';
 
 // escape an attribute
 let esc = str => String(str).replace(/[&<>"']/g, s=>`&${map[s]};`);
@@ -10,14 +9,9 @@ let DOMAttributeNames = {
 	htmlFor: 'for'
 };
 
-// LRU cache with TTL to prevent unbounded memory growth
-// Large max (100k) prevents eviction during HTML composition
-// TTL (60s) handles automatic cleanup
-let sanitized = new LRUCache({
-	max: 100000,
-	ttl: 60 * 1000, // 60 seconds
-	updateAgeOnGet: false
-});
+// WeakMap to track sanitized HTML fragments
+// String objects can be keys, and they're automatically GC'd when unreferenced
+let sanitized = new WeakMap();
 
 /** Hyperscript reviver that constructs a sanitized HTML string. */
 export default function h(name, attrs) {
@@ -63,6 +57,8 @@ export default function h(name, attrs) {
 		s += name ? `</${name}>` : '';
 	}
 
-	sanitized.set(s, true);
-	return s;
+	// Wrap result in String object so it can be used as WeakMap key
+	let result = new String(s);
+	sanitized.set(result, true);
+	return result;
 }
