@@ -1,4 +1,5 @@
 import emptyTags from './empty-tags';
+import { LRUCache } from 'lru-cache';
 
 // escape an attribute
 let esc = str => String(str).replace(/[&<>"']/g, s=>`&${map[s]};`);
@@ -9,7 +10,15 @@ let DOMAttributeNames = {
 	htmlFor: 'for'
 };
 
-let sanitized = {};
+// Use LRU cache to prevent unbounded memory growth
+// Based on heap analysis: ~5,400 strings per feed, 15s regeneration cycle
+// 10,000 max = ~2 feeds worth (allows cache hits during regeneration)
+// Strings are ~32 bytes each, so 10,000 entries = ~320 KB
+let sanitized = new LRUCache({
+	max: 10000,
+	maxSize: 5 * 1024 * 1024,  // 5 MB safety cap
+	sizeCalculation: () => 1    // Count-based eviction (uniform string sizes)
+});
 
 /** Hyperscript reviver that constructs a sanitized HTML string. */
 export default function h(name, attrs) {
@@ -47,7 +56,7 @@ export default function h(name, attrs) {
 					for (let i=child.length; i--; ) stack.push(child[i]);
 				}
 				else {
-					s += sanitized[child]===true ? child : esc(child);
+					s += sanitized.has(child) ? child : esc(child);
 				}
 			}
 		}
@@ -55,6 +64,6 @@ export default function h(name, attrs) {
 		s += name ? `</${name}>` : '';
 	}
 
-	sanitized[s] = true;
+	sanitized.set(s, true);
 	return s;
 }
