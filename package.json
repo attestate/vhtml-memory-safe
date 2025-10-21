@@ -3,7 +3,7 @@
   "amdName": "vhtml",
   "version": "2.2.0",
   "description": "Hyperscript reviver that constructs a sanitized HTML string.",
-  "main": "dist/vhtml.js",
+  "main": "src/vhtml.js",
   "minified:main": "dist/vhtml.min.js",
   "jsnext:main": "src/vhtml.js",
   "scripts": {
@@ -12,7 +12,6 @@
     "minify": "uglifyjs $npm_package_main -cm -o $npm_package_minified_main -p relative --in-source-map ${npm_package_main}.map --source-map ${npm_package_minified_main}.map",
     "size": "echo \"gzip size: $(gzip-size $npm_package_minified_main | pretty-bytes)\"",
     "test": "eslint {src,test} && mocha --compilers js:babel-register test/**/*.js",
-    "prepublish": "npm-run-all build test",
     "release": "npm run -s build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "babel": {
