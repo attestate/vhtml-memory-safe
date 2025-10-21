@@ -2,6 +2,7 @@
   "name": "vhtml",
   "amdName": "vhtml",
   "version": "2.2.0",
+  "type": "module",
   "description": "Hyperscript reviver that constructs a sanitized HTML string.",
   "main": "src/vhtml.js",
   "minified:main": "dist/vhtml.min.js",
