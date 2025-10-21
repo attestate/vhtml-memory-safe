@@ -1,4 +1,4 @@
-import emptyTags from './empty-tags';
+import emptyTags from './empty-tags.js';
 import { LRUCache } from 'lru-cache';
 
 // escape an attribute
